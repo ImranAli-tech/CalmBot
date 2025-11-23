@@ -1,75 +1,107 @@
-# CalmBot
-CalmBot – Meditation Guide 🧘‍♂️🤖
+import pyttsx3
+import time
+import random
+from playsound import playsound
+import threading
 
-A Python-based interactive meditation assistant that guides users through relaxing breathing exercises using voice instructions, calming music, and humorous responses. CalmBot helps users stay focused, relaxed, and entertained during meditation.
+# Initialize text-to-speech engine
+engine = pyttsx3.init()
 
-🌿 Overview
+def speak(text):
+    """Convert text to speech and print it."""
+    print(f"CalmBot 😌: {text}")
+    engine.say(text)
+    engine.runAndWait()
 
-CalmBot is a meditation guide that uses text-to-speech, background music, and dynamic humor to make meditation more engaging. The bot walks users through breathing cycles and reacts based on a “patience level,” making each session unique and fun.
+def get_random_funny_line(patience_level):
+    """Return a funny or sarcastic line depending on CalmBot’s patience."""
+    funny_lines = {
+        3: [
+            "You're doing great. Inner peace is near. Probably.",
+            "Ahh... the sound of calm... or was that your stomach?",
+        ],
+        2: [
+            "You’re supposed to be breathing, not checking your phone 😤",
+            "Focus! Even my circuits are calmer than you right now.",
+        ],
+        1: [
+            "Okay seriously... are you meditating or buffering?",
+            "You test my patience, human. I’m calm… I’m calm… maybe.",
+        ],
+        0: [
+            "I give up. Namaste and goodbye. 😤💨",
+            "I’m out of patience. Try yoga next time!",
+        ],
+    }
+    return random.choice(funny_lines.get(patience_level, funny_lines[3]))
 
-✨ Features
+def play_random_music():
+    """Play one of the meditation tracks randomly in the background."""
+    music_files = [
+        "please-calm-my-mind-125566.mp3",
+        "meditation-music-427644.mp3",
+        "eternal-drift-music-429062.mp3"
+    ]
+    chosen_track = random.choice(music_files)
+    print(f"\n🎵 Playing background track: {chosen_track}\n")
+    # Play in a separate thread so it doesn't block the meditation
+    threading.Thread(target=playsound, args=(chosen_track,), daemon=True).start()
 
-🗣 Voice-guided meditation using pyttsx3
+def meditate(cycles=3, patience_level=3):
+    """Main meditation loop."""
+    speak("Welcome to AI Meditation Guide — CalmBot.")
+    speak("Let's begin your journey to calmness.")
+    
+    # Start random background music
+    play_random_music()
 
-🎵 Relaxing background music played through threading
+    for i in range(cycles):
+        speak(f"Cycle {i+1} begins.")
+        
+        speak("Breathe in... deeply.")
+        time.sleep(3)
 
-😄 Funny & sarcastic responses based on user “patience level”
+        speak("Hold it...")
+        time.sleep(2)
 
-🧘 Guided breathing cycles with timed instructions
+        speak("Now breathe out slowly...")
+        time.sleep(4)
 
-📜 Certificate of Calmness summary at the end
+        # Random chance for funny/sarcastic line
+        if random.random() < 0.4:
+            speak(get_random_funny_line(patience_level))
 
-💻 Fully terminal-based, lightweight, and beginner-friendly
+        # Randomly reduce patience
+        if random.random() < 0.3:
+            patience_level = max(0, patience_level - 1)
 
-📂 Project Structure CalmBot/ │── meditation.py # Main project file │── music/ # Folder for meditation audio tracks │ ├── please-calm-my-mind.mp3 │ ├── meditation-music.mp3 │ └── eternal-drift.mp3 └── README.md
+        time.sleep(2)
 
-🛠 Libraries Used
+        if patience_level == 0:
+            speak("Session ended early because I need a break too 😤")
+            break
 
-pyttsx3 – Text-to-speech engine
+    session_summary(patience_level)
 
-time – Timing and breathing intervals
+def session_summary(patience_level):
+    """Print and speak a funny 'Certificate of Calmness'."""
+    speak("Meditation complete!")
+    print("\n🪷 ==== Certificate of Calmness ==== 🪷")
+    if patience_level == 3:
+        print("You remained calm and focused. Even CalmBot is impressed! 😇")
+    elif patience_level == 2:
+        print("Pretty good! A few distractions, but peace was achieved. 🌿")
+    elif patience_level == 1:
+        print("You barely made it... CalmBot almost screamed. 😤")
+    else:
+        print("You broke CalmBot’s patience. Try again tomorrow! 💀")
+    print("=====================================")
+    speak("Thank you for meditating with me. Stay calm, human.")
 
-random – Randomized humor and track selection
-
-playsound – Audio playback
-
-threading – Background music without blocking execution
-
-🚀 How to Run
-
-Install Required Libraries pip install pyttsx3 playsound
-
-Place your music files
-
-Add .mp3 files to the project folder (or update the paths in the code).
-
-Run the Program python meditation.py
-🧘 How It Works
-
-CalmBot welcomes you with a soothing voice.
-
-Background meditation music begins playing.
-
-You go through breathing cycles:
-
-Breathe in
-
-Hold
-
-Breathe out
-
-CalmBot randomly generates funny comments.
-
-Your “patience level” changes dynamically.
-
-You receive your Certificate of Calmness at the end. 🎯 Purpose of the Project
-
-This project was developed as part of Python Lab (5.0CE252E02) under the CSE Department, MRIIRS. It demonstrates:
-
-Voice synthesis
-
-Threading
-
-Interactive console design
-
-Fun & creative programming
+# Run only when executed directly
+if __name__ == "__main__":
+    try:
+        meditate(cycles=3, patience_level=3)
+    except KeyboardInterrupt:
+        speak("Meditation interrupted! Even I felt that panic.")
+        print("\nSession terminated by user.")
